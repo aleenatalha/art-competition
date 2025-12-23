@@ -1,0 +1,851 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Art Competition Booking</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f9fafb;
+            color: #1f2937;
+        }
+
+        .navbar {
+            background: #4f46e5;
+            color: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .navbar h1 {
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        .navbar-links {
+            display: flex;
+            gap: 1.5rem;
+            align-items: center;
+        }
+
+        .navbar-links button {
+            background: none;
+            border: none;
+            color: white;
+            cursor: pointer;
+            font-size: 1rem;
+            padding: 0.5rem 1rem;
+            border-radius: 0.375rem;
+            transition: background 0.2s;
+        }
+
+        .navbar-links button:hover {
+            background: rgba(255,255,255,0.1);
+        }
+
+        .btn-primary {
+            background: white !important;
+            color: #4f46e5 !important;
+            padding: 0.5rem 1rem !important;
+            font-weight: 600;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .page-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .filters {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin-bottom: 2rem;
+        }
+
+        .filters select {
+            padding: 0.5rem 1rem;
+            border: 1px solid #d1d5db;
+            border-radius: 0.375rem;
+            font-size: 1rem;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .card {
+            background: white;
+            border-radius: 0.5rem;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            transition: box-shadow 0.3s;
+        }
+
+        .card:hover {
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .card img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+        }
+
+        .card-body {
+            padding: 1.5rem;
+        }
+
+        .card-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .card-category {
+            color: #6b7280;
+            font-size: 0.875rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .card-description {
+            color: #4b5563;
+            margin-bottom: 1rem;
+            line-height: 1.5;
+        }
+
+        .card-info {
+            font-size: 0.875rem;
+            color: #6b7280;
+            margin-bottom: 1rem;
+        }
+
+        .card-info p {
+            margin-bottom: 0.25rem;
+        }
+
+        .card-price {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #4f46e5;
+            margin-bottom: 1rem;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 0.75rem;
+            background: #4f46e5;
+            color: white;
+            border: none;
+            border-radius: 0.375rem;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .btn:hover {
+            background: #4338ca;
+        }
+
+        .btn-secondary {
+            background: #ef4444;
+        }
+
+        .btn-secondary:hover {
+            background: #dc2626;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 0.375rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .badge-green {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .badge-red {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .form-container {
+            max-width: 500px;
+            margin: 3rem auto;
+            background: white;
+            padding: 2rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #d1d5db;
+            border-radius: 0.375rem;
+            font-size: 1rem;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .alert {
+            padding: 1rem;
+            border-radius: 0.375rem;
+            margin-bottom: 1rem;
+        }
+
+        .alert-error {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .alert-success {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .text-center {
+            text-align: center;
+        }
+
+        .mt-4 {
+            margin-top: 1rem;
+        }
+
+        .link {
+            color: #4f46e5;
+            cursor: pointer;
+            text-decoration: underline;
+        }
+
+        .demo-info {
+            background: #dbeafe;
+            padding: 1rem;
+            border-radius: 0.375rem;
+            margin-top: 1rem;
+            font-size: 0.875rem;
+        }
+
+        .detail-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 0.5rem;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .detail-body {
+            padding: 2rem;
+        }
+
+        .detail-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            background: #f9fafb;
+            padding: 1.5rem;
+            border-radius: 0.375rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .back-link {
+            color: #4f46e5;
+            cursor: pointer;
+            margin-bottom: 1rem;
+            display: inline-block;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <h1 onclick="app.showPage('home')">Art Competition Hub</h1>
+        <div class="navbar-links">
+            <button onclick="app.showPage('home')">Competitions</button>
+            <span id="nav-user" class="hidden"></span>
+        </div>
+    </nav>
+
+    <div id="app-content"></div>
+
+    <script>
+        const app = {
+            currentUser: null,
+            currentPage: 'home',
+            selectedCompetition: null,
+
+            init() {
+                this.loadUser();
+                this.initData();
+                this.showPage('home');
+            },
+
+            initData() {
+                if (!localStorage.getItem('artCompData')) {
+                    const data = {
+                        users: [
+                            { id: 1, email: 'admin@art.com', password: 'admin123', name: 'Admin', role: 'admin' },
+                            { id: 2, email: 'user@art.com', password: 'user123', name: 'John Doe', role: 'user' }
+                        ],
+                        competitions: [
+                            {
+                                id: 1,
+                                title: 'Annual Painting Exhibition 2024',
+                                description: 'Showcase your best paintings in this prestigious annual exhibition.',
+                                category: 'Painting',
+                                date: '2024-06-15',
+                                location: 'New York',
+                                maxParticipants: 100,
+                                currentParticipants: 0,
+                                entryFee: 50,
+                                imageUrl: 'https://images.unsplash.com/photo-1460661419201-fd4cecdf8a8b?w=800',
+                                status: 'open'
+                            },
+                            {
+                                id: 2,
+                                title: 'Modern Sculpture Challenge',
+                                description: 'Push the boundaries of contemporary sculpture.',
+                                category: 'Sculpture',
+                                date: '2024-07-20',
+                                location: 'Los Angeles',
+                                maxParticipants: 50,
+                                currentParticipants: 0,
+                                entryFee: 75,
+                                imageUrl: 'https://images.unsplash.com/photo-1551732998-9fa5c427e33e?w=800',
+                                status: 'open'
+                            },
+                            {
+                                id: 3,
+                                title: 'Nature Photography Contest',
+                                description: 'Capture the beauty of nature through your lens.',
+                                category: 'Photography',
+                                date: '2024-08-10',
+                                location: 'Chicago',
+                                maxParticipants: 200,
+                                currentParticipants: 0,
+                                entryFee: 35,
+                                imageUrl: 'https://images.unsplash.com/photo-1452587925148-ce544e77e70d?w=800',
+                                status: 'open'
+                            },
+                            {
+                                id: 4,
+                                title: 'Digital Art Showcase 2024',
+                                description: 'The future of art is digital.',
+                                category: 'Digital Art',
+                                date: '2024-09-05',
+                                location: 'San Francisco',
+                                maxParticipants: 150,
+                                currentParticipants: 0,
+                                entryFee: 40,
+                                imageUrl: 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=800',
+                                status: 'open'
+                            }
+                        ],
+                        bookings: [],
+                        nextUserId: 3,
+                        nextCompId: 5,
+                        nextBookingId: 1
+                    };
+                    localStorage.setItem('artCompData', JSON.stringify(data));
+                }
+            },
+
+            getData() {
+                return JSON.parse(localStorage.getItem('artCompData'));
+            },
+
+            saveData(data) {
+                localStorage.setItem('artCompData', JSON.stringify(data));
+            },
+
+            loadUser() {
+                const user = localStorage.getItem('currentUser');
+                if (user) {
+                    this.currentUser = JSON.parse(user);
+                    this.updateNav();
+                }
+            },
+
+            updateNav() {
+                const navUser = document.getElementById('nav-user');
+                if (this.currentUser) {
+                    navUser.innerHTML = `
+                        <button onclick="app.showPage('bookings')">My Bookings</button>
+                        ${this.currentUser.role === 'admin' ? '<button onclick="app.showPage(\'admin\')">Admin</button>' : ''}
+                        <span style="font-size: 0.875rem;">Welcome, ${this.currentUser.name}</span>
+                        <button class="btn-primary" onclick="app.logout()">Logout</button>
+                    `;
+                    navUser.classList.remove('hidden');
+                } else {
+                    navUser.innerHTML = `
+                        <button onclick="app.showPage('login')">Login</button>
+                        <button class="btn-primary" onclick="app.showPage('register')">Register</button>
+                    `;
+                    navUser.classList.remove('hidden');
+                }
+            },
+
+            logout() {
+                this.currentUser = null;
+                localStorage.removeItem('currentUser');
+                this.updateNav();
+                this.showPage('home');
+            },
+
+            showPage(page, data) {
+                this.currentPage = page;
+                if (data) this.selectedCompetition = data;
+
+                const content = document.getElementById('app-content');
+
+                switch(page) {
+                    case 'home':
+                        content.innerHTML = this.renderHome();
+                        break;
+                    case 'login':
+                        content.innerHTML = this.renderLogin();
+                        break;
+                    case 'register':
+                        content.innerHTML = this.renderRegister();
+                        break;
+                    case 'detail':
+                        content.innerHTML = this.renderDetail();
+                        break;
+                    case 'bookings':
+                        content.innerHTML = this.renderBookings();
+                        break;
+                    case 'admin':
+                        content.innerHTML = this.renderAdmin();
+                        break;
+                }
+            },
+
+            renderHome() {
+                const data = this.getData();
+                const competitions = data.competitions.filter(c => c.status === 'open');
+
+                return `
+                    <div class="container">
+                        <h1 class="page-title">Art Competitions</h1>
+                        <div class="grid">
+                            ${competitions.map(comp => `
+                                <div class="card">
+                                    <img src="${comp.imageUrl}" alt="${comp.title}">
+                                    <div class="card-body">
+                                        <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 0.5rem;">
+                                            <h3 class="card-title">${comp.title}</h3>
+                                            <span class="badge ${comp.status === 'open' ? 'badge-green' : 'badge-red'}">${comp.status}</span>
+                                        </div>
+                                        <p class="card-category">${comp.category}</p>
+                                        <p class="card-description">${comp.description}</p>
+                                        <div class="card-info">
+                                            <p>📅 ${new Date(comp.date).toLocaleDateString()}</p>
+                                            <p>📍 ${comp.location}</p>
+                                            <p>👥 ${comp.currentParticipants} / ${comp.maxParticipants}</p>
+                                        </div>
+                                        <p class="card-price">$${comp.entryFee}</p>
+                                        <button class="btn" onclick="app.showPage('detail', ${comp.id})">View Details</button>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            },
+
+            renderLogin() {
+                return `
+                    <div class="form-container">
+                        <h2 class="page-title">Login</h2>
+                        <div id="login-alert"></div>
+                        <form onsubmit="app.handleLogin(event)">
+                            <div class="form-group">
+                                <label>Email</label>
+                                <input type="email" id="login-email" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Password</label>
+                                <input type="password" id="login-password" required>
+                            </div>
+                            <button type="submit" class="btn">Login</button>
+                        </form>
+                        <p class="text-center mt-4">
+                            Don't have an account?
+                            <span class="link" onclick="app.showPage('register')">Register here</span>
+                        </p>
+                        <div class="demo-info">
+                            <strong>Demo Accounts:</strong><br>
+                            Admin: admin@art.com / admin123<br>
+                            User: user@art.com / user123
+                        </div>
+                    </div>
+                `;
+            },
+
+            renderRegister() {
+                return `
+                    <div class="form-container">
+                        <h2 class="page-title">Register</h2>
+                        <div id="register-alert"></div>
+                        <form onsubmit="app.handleRegister(event)">
+                            <div class="form-group">
+                                <label>Full Name</label>
+                                <input type="text" id="reg-name" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Email</label>
+                                <input type="email" id="reg-email" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Password</label>
+                                <input type="password" id="reg-password" required minlength="6">
+                            </div>
+                            <button type="submit" class="btn">Register</button>
+                        </form>
+                        <p class="text-center mt-4">
+                            Already have an account?
+                            <span class="link" onclick="app.showPage('login')">Login here</span>
+                        </p>
+                    </div>
+                `;
+            },
+
+            renderDetail() {
+                const data = this.getData();
+                const comp = data.competitions.find(c => c.id === this.selectedCompetition);
+                if (!comp) return '<div class="container">Competition not found</div>';
+
+                const spotsLeft = comp.maxParticipants - comp.currentParticipants;
+
+                return `
+                    <div class="container">
+                        <span class="back-link" onclick="app.showPage('home')">← Back to Competitions</span>
+                        <div class="detail-container">
+                            <img src="${comp.imageUrl}" alt="${comp.title}" style="width: 100%; height: 300px; object-fit: cover;">
+                            <div class="detail-body">
+                                <h1 style="font-size: 2rem; font-weight: 700; margin-bottom: 1rem;">${comp.title}</h1>
+                                <p style="color: #6b7280; margin-bottom: 1.5rem;">${comp.category}</p>
+                                <p style="font-size: 1.125rem; line-height: 1.75; margin-bottom: 1.5rem;">${comp.description}</p>
+
+                                <div class="detail-grid">
+                                    <div>
+                                        <p style="font-size: 0.875rem; color: #6b7280;">Date</p>
+                                        <p style="font-weight: 600;">${new Date(comp.date).toLocaleDateString()}</p>
+                                    </div>
+                                    <div>
+                                        <p style="font-size: 0.875rem; color: #6b7280;">Location</p>
+                                        <p style="font-weight: 600;">${comp.location}</p>
+                                    </div>
+                                    <div>
+                                        <p style="font-size: 0.875rem; color: #6b7280;">Entry Fee</p>
+                                        <p style="font-weight: 600; font-size: 1.5rem; color: #4f46e5;">$${comp.entryFee}</p>
+                                    </div>
+                                    <div>
+                                        <p style="font-size: 0.875rem; color: #6b7280;">Spots Available</p>
+                                        <p style="font-weight: 600;">${spotsLeft} / ${comp.maxParticipants}</p>
+                                    </div>
+                                </div>
+
+                                ${this.currentUser && comp.status === 'open' && spotsLeft > 0 ? `
+                                    <div style="border-top: 1px solid #e5e7eb; padding-top: 1.5rem;">
+                                        <h2 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 1rem;">Book Your Spot</h2>
+                                        <div id="booking-alert"></div>
+                                        <form onsubmit="app.handleBooking(event, ${comp.id})">
+                                            <div class="form-group">
+                                                <label>Artwork Title (Optional)</label>
+                                                <input type="text" id="artwork-title">
+                                            </div>
+                                            <div class="form-group">
+                                                <label>Artwork Description (Optional)</label>
+                                                <textarea id="artwork-desc"></textarea>
+                                            </div>
+                                            <button type="submit" class="btn">Book Now</button>
+                                        </form>
+                                    </div>
+                                ` : !this.currentUser ? `
+                                    <div style="border-top: 1px solid #e5e7eb; padding-top: 1.5rem; text-align: center;">
+                                        <p style="margin-bottom: 1rem; color: #6b7280;">Please login to book this competition</p>
+                                        <button class="btn" onclick="app.showPage('login')">Login to Book</button>
+                                    </div>
+                                ` : ''}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            },
+
+            renderBookings() {
+                if (!this.currentUser) {
+                    this.showPage('login');
+                    return '';
+                }
+
+                const data = this.getData();
+                const userBookings = data.bookings.filter(b => b.userId === this.currentUser.id);
+
+                return `
+                    <div class="container">
+                        <h1 class="page-title">My Bookings</h1>
+                        ${userBookings.length === 0 ? `
+                            <div class="text-center" style="padding: 3rem;">
+                                <p style="color: #6b7280;">You haven't made any bookings yet.</p>
+                            </div>
+                        ` : `
+                            <div style="max-width: 800px; margin: 0 auto;">
+                                ${userBookings.map(booking => {
+                                    const comp = data.competitions.find(c => c.id === booking.competitionId);
+                                    return `
+                                        <div class="card" style="margin-bottom: 1rem;">
+                                            <div class="card-body">
+                                                <h3 class="card-title">${comp.title}</h3>
+                                                <div class="card-info">
+                                                    <p>📅 ${new Date(comp.date).toLocaleDateString()}</p>
+                                                    <p>📍 ${comp.location}</p>
+                                                    <p>🕒 Booked: ${new Date(booking.bookingDate).toLocaleDateString()}</p>
+                                                </div>
+                                                ${booking.artworkTitle ? `
+                                                    <div style="background: #f9fafb; padding: 1rem; border-radius: 0.375rem; margin: 1rem 0;">
+                                                        <p style="font-weight: 600;">Artwork: ${booking.artworkTitle}</p>
+                                                        ${booking.artworkDescription ? `<p style="margin-top: 0.5rem;">${booking.artworkDescription}</p>` : ''}
+                                                    </div>
+                                                ` : ''}
+                                                <div style="display: flex; justify-content: space-between; align-items: center;">
+                                                    <span class="badge ${booking.status === 'confirmed' ? 'badge-green' : 'badge-red'}">${booking.status}</span>
+                                                    ${booking.status === 'confirmed' ? `
+                                                        <button class="btn btn-secondary" style="width: auto; padding: 0.5rem 1rem;" onclick="app.cancelBooking(${booking.id})">Cancel</button>
+                                                    ` : ''}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    `;
+                                }).join('')}
+                            </div>
+                        `}
+                    </div>
+                `;
+            },
+
+            renderAdmin() {
+                if (!this.currentUser || this.currentUser.role !== 'admin') {
+                    return '<div class="container text-center" style="padding: 3rem;">Access denied. Admin only.</div>';
+                }
+
+                const data = this.getData();
+
+                return `
+                    <div class="container">
+                        <h1 class="page-title">Admin Panel</h1>
+                        <div style="max-width: 800px; margin: 0 auto;">
+                            <h2 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 1rem;">All Competitions</h2>
+                            ${data.competitions.map(comp => `
+                                <div class="card" style="margin-bottom: 1rem;">
+                                    <div class="card-body">
+                                        <h3 class="card-title">${comp.title}</h3>
+                                        <p class="card-category">${comp.category}</p>
+                                        <p style="font-size: 0.875rem; color: #6b7280;">
+                                            ${new Date(comp.date).toLocaleDateString()} • ${comp.location} • $${comp.entryFee}
+                                        </p>
+                                        <p style="font-size: 0.875rem; color: #6b7280;">
+                                            Participants: ${comp.currentParticipants}/${comp.maxParticipants}
+                                        </p>
+                                        <div style="display: flex; gap: 0.5rem; margin-top: 1rem;">
+                                            <span class="badge ${comp.status === 'open' ? 'badge-green' : 'badge-red'}">${comp.status}</span>
+                                            <button class="btn" style="width: auto; padding: 0.5rem 1rem; font-size: 0.875rem;" onclick="app.toggleStatus(${comp.id})">
+                                                Toggle Status
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            `).join('')}
+
+                            <h2 style="font-size: 1.5rem; font-weight: 700; margin: 2rem 0 1rem;">All Bookings</h2>
+                            ${data.bookings.map(booking => {
+                                const comp = data.competitions.find(c => c.id === booking.competitionId);
+                                const user = data.users.find(u => u.id === booking.userId);
+                                return `
+                                    <div class="card" style="margin-bottom: 1rem;">
+                                        <div class="card-body">
+                                            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem;">
+                                                <div>
+                                                    <p style="font-size: 0.875rem; color: #6b7280;">Competition</p>
+                                                    <p style="font-weight: 600;">${comp.title}</p>
+                                                </div>
+                                                <div>
+                                                    <p style="font-size: 0.875rem; color: #6b7280;">User</p>
+                                                    <p style="font-weight: 600;">${user.name}</p>
+                                                    <p style="font-size: 0.875rem;">${user.email}</p>
+                                                </div>
+                                                <div>
+                                                    <p style="font-size: 0.875rem; color: #6b7280;">Booked</p>
+                                                    <p>${new Date(booking.bookingDate).toLocaleDateString()}</p>
+                                                </div>
+                                                <div>
+                                                    <p style="font-size: 0.875rem; color: #6b7280;">Status</p>
+                                                    <span class="badge ${booking.status === 'confirmed' ? 'badge-green' : 'badge-red'}">${booking.status}</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                `;
+                            }).join('')}
+                        </div>
+                    </div>
+                `;
+            },
+
+            handleLogin(e) {
+                e.preventDefault();
+                const email = document.getElementById('login-email').value;
+                const password = document.getElementById('login-password').value;
+
+                const data = this.getData();
+                const user = data.users.find(u => u.email === email && u.password === password);
+
+                const alert = document.getElementById('login-alert');
+                if (user) {
+                    this.currentUser = { id: user.id, email: user.email, name: user.name, role: user.role };
+                    localStorage.setItem('currentUser', JSON.stringify(this.currentUser));
+                    this.updateNav();
+                    this.showPage('home');
+                } else {
+                    alert.innerHTML = '<div class="alert alert-error">Invalid credentials</div>';
+                }
+            },
+
+            handleRegister(e) {
+                e.preventDefault();
+                const name = document.getElementById('reg-name').value;
+                const email = document.getElementById('reg-email').value;
+                const password = document.getElementById('reg-password').value;
+
+                const data = this.getData();
+                const alert = document.getElementById('register-alert');
+
+                if (data.users.find(u => u.email === email)) {
+                    alert.innerHTML = '<div class="alert alert-error">Email already registered</div>';
+                    return;
+                }
+
+                const newUser = {
+                    id: data.nextUserId++,
+                    email,
+                    password,
+                    name,
+                    role: 'user'
+                };
+
+                data.users.push(newUser);
+                this.saveData(data);
+
+                this.currentUser = { id: newUser.id, email: newUser.email, name: newUser.name, role: newUser.role };
+                localStorage.setItem('currentUser', JSON.stringify(this.currentUser));
+                this.updateNav();
+                this.showPage('home');
+            },
+
+            handleBooking(e, compId) {
+                e.preventDefault();
+                const title = document.getElementById('artwork-title').value;
+                const desc = document.getElementById('artwork-desc').value;
+
+                const data = this.getData();
+                const comp = data.competitions.find(c => c.id === compId);
+                const alert = document.getElementById('booking-alert');
+
+                if (comp.currentParticipants >= comp.maxParticipants) {
+                    alert.innerHTML = '<div class="alert alert-error">Competition is fully booked</div>';
+                    return;
+                }
+
+                if (data.bookings.find(b => b.userId === this.currentUser.id && b.competitionId === compId)) {
+                    alert.innerHTML = '<div class="alert alert-error">You have already booked this competition</div>';
+                    return;
+                }
+
+                const booking = {
+                    id: data.nextBookingId++,
+                    userId: this.currentUser.id,
+                    competitionId: compId,
+                    artworkTitle: title,
+                    artworkDescription: desc,
+                    status: 'confirmed',
+                    bookingDate: new Date().toISOString()
+                };
+
+                data.bookings.push(booking);
+                comp.currentParticipants++;
+                this.saveData(data);
+
+                alert.innerHTML = '<div class="alert alert-success">Booking successful! Check your bookings page.</div>';
+                setTimeout(() => this.showPage('bookings'), 2000);
+            },
+
+            cancelBooking(bookingId) {
+                if (!confirm('Cancel this booking?')) return;
+
+                const data = this.getData();
+                const booking = data.bookings.find(b => b.id === bookingId);
+                booking.status = 'cancelled';
+
+                const comp = data.competitions.find(c => c.id === booking.competitionId);
+                comp.currentParticipants--;
+
+                this.saveData(data);
+                this.showPage('bookings');
+            },
+
+            toggleStatus(compId) {
+                const data = this.getData();
+                const comp = data.competitions.find(c => c.id === compId);
+                comp.status = comp.status === 'open' ? 'closed' : 'open';
+                this.saveData(data);
+                this.showPage('admin');
+            }
+        };
+
+        window.addEventListener('DOMContentLoaded', () => app.init());
+    </script>
+</body>
+</html>
