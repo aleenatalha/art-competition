@@ -1,0 +1,1011 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Art Competition Booking</title>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            margin: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, createContext, useContext } = React;
+
+        // Initialize sample data
+        const initializeData = () => {
+            if (!localStorage.getItem('artCompetitionData')) {
+                const initialData = {
+                    users: [
+                        { id: 1, email: 'admin@artcompetition.com', password: 'admin123', name: 'Admin User', role: 'admin' },
+                        { id: 2, email: 'user@example.com', password: 'user123', name: 'John Doe', role: 'user' }
+                    ],
+                    competitions: [
+                        {
+                            id: 1,
+                            title: 'Annual Painting Exhibition 2024',
+                            description: 'Showcase your best paintings in this prestigious annual exhibition. Open to all painting styles including oil, acrylic, watercolor, and mixed media.',
+                            category: 'Painting',
+                            date: '2024-06-15',
+                            location: 'Metropolitan Art Gallery, New York',
+                            maxParticipants: 100,
+                            currentParticipants: 0,
+                            entryFee: 50.00,
+                            imageUrl: 'https://images.unsplash.com/photo-1460661419201-fd4cecdf8a8b?w=800&h=400&fit=crop',
+                            status: 'open'
+                        },
+                        {
+                            id: 2,
+                            title: 'Modern Sculpture Challenge',
+                            description: 'Push the boundaries of contemporary sculpture. All materials welcome: metal, wood, clay, found objects, and innovative new materials.',
+                            category: 'Sculpture',
+                            date: '2024-07-20',
+                            location: 'City Arts Center, Los Angeles',
+                            maxParticipants: 50,
+                            currentParticipants: 0,
+                            entryFee: 75.00,
+                            imageUrl: 'https://images.unsplash.com/photo-1551732998-9fa5c427e33e?w=800&h=400&fit=crop',
+                            status: 'open'
+                        },
+                        {
+                            id: 3,
+                            title: 'Nature Photography Contest',
+                            description: 'Capture the beauty of nature through your lens. Categories include landscapes, wildlife, macro, and environmental themes.',
+                            category: 'Photography',
+                            date: '2024-08-10',
+                            location: 'National Photography Museum, Chicago',
+                            maxParticipants: 200,
+                            currentParticipants: 0,
+                            entryFee: 35.00,
+                            imageUrl: 'https://images.unsplash.com/photo-1452587925148-ce544e77e70d?w=800&h=400&fit=crop',
+                            status: 'open'
+                        },
+                        {
+                            id: 4,
+                            title: 'Digital Art Showcase 2024',
+                            description: 'The future of art is digital. Submit your digital paintings, 3D art, animations, or generative art pieces for this cutting-edge exhibition.',
+                            category: 'Digital Art',
+                            date: '2024-09-05',
+                            location: 'Tech & Art Hub, San Francisco',
+                            maxParticipants: 150,
+                            currentParticipants: 0,
+                            entryFee: 40.00,
+                            imageUrl: 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=800&h=400&fit=crop',
+                            status: 'open'
+                        },
+                        {
+                            id: 5,
+                            title: 'Mixed Media Innovation Award',
+                            description: 'Break the rules and combine multiple art forms. Judges will be looking for creativity, innovation, and technical excellence in mixed media work.',
+                            category: 'Mixed Media',
+                            date: '2024-10-15',
+                            location: 'Contemporary Arts Institute, Miami',
+                            maxParticipants: 75,
+                            currentParticipants: 0,
+                            entryFee: 60.00,
+                            imageUrl: 'https://images.unsplash.com/photo-1541961017774-22349e4a1262?w=800&h=400&fit=crop',
+                            status: 'open'
+                        },
+                        {
+                            id: 6,
+                            title: 'Portrait Masters Competition',
+                            description: 'Celebrate the art of portraiture. Traditional and contemporary approaches welcome. Includes categories for realism and abstraction.',
+                            category: 'Painting',
+                            date: '2024-11-01',
+                            location: 'National Portrait Gallery, Washington DC',
+                            maxParticipants: 80,
+                            currentParticipants: 0,
+                            entryFee: 55.00,
+                            imageUrl: 'https://images.unsplash.com/photo-1578301978162-7aae4d755744?w=800&h=400&fit=crop',
+                            status: 'open'
+                        }
+                    ],
+                    bookings: [],
+                    nextUserId: 3,
+                    nextCompetitionId: 7,
+                    nextBookingId: 1
+                };
+                localStorage.setItem('artCompetitionData', JSON.stringify(initialData));
+            }
+        };
+
+        const getData = () => JSON.parse(localStorage.getItem('artCompetitionData'));
+        const saveData = (data) => localStorage.setItem('artCompetitionData', JSON.stringify(data));
+
+        // Auth Context
+        const AuthContext = createContext();
+
+        const AuthProvider = ({ children }) => {
+            const [user, setUser] = useState(null);
+
+            useEffect(() => {
+                const savedUser = localStorage.getItem('currentUser');
+                if (savedUser) {
+                    setUser(JSON.parse(savedUser));
+                }
+            }, []);
+
+            const login = (email, password) => {
+                const data = getData();
+                const foundUser = data.users.find(u => u.email === email && u.password === password);
+                if (foundUser) {
+                    const userInfo = { id: foundUser.id, email: foundUser.email, name: foundUser.name, role: foundUser.role };
+                    setUser(userInfo);
+                    localStorage.setItem('currentUser', JSON.stringify(userInfo));
+                    return { success: true };
+                }
+                return { success: false, error: 'Invalid credentials' };
+            };
+
+            const register = (email, password, name) => {
+                const data = getData();
+                if (data.users.find(u => u.email === email)) {
+                    return { success: false, error: 'Email already registered' };
+                }
+                const newUser = {
+                    id: data.nextUserId++,
+                    email,
+                    password,
+                    name,
+                    role: 'user'
+                };
+                data.users.push(newUser);
+                saveData(data);
+                const userInfo = { id: newUser.id, email: newUser.email, name: newUser.name, role: newUser.role };
+                setUser(userInfo);
+                localStorage.setItem('currentUser', JSON.stringify(userInfo));
+                return { success: true };
+            };
+
+            const logout = () => {
+                setUser(null);
+                localStorage.removeItem('currentUser');
+            };
+
+            return (
+                <AuthContext.Provider value={{ user, login, register, logout }}>
+                    {children}
+                </AuthContext.Provider>
+            );
+        };
+
+        const useAuth = () => useContext(AuthContext);
+
+        // Navbar Component
+        const Navbar = ({ setCurrentPage }) => {
+            const { user, logout } = useAuth();
+
+            return (
+                <nav className="bg-indigo-600 text-white shadow-lg">
+                    <div className="container mx-auto px-4">
+                        <div className="flex justify-between items-center h-16">
+                            <button onClick={() => setCurrentPage('home')} className="text-xl font-bold cursor-pointer hover:text-gray-200">
+                                Art Competition Hub
+                            </button>
+                            <div className="flex items-center gap-6">
+                                <button onClick={() => setCurrentPage('home')} className="hover:text-gray-200">
+                                    Competitions
+                                </button>
+                                {user ? (
+                                    <>
+                                        <button onClick={() => setCurrentPage('my-bookings')} className="hover:text-gray-200">
+                                            My Bookings
+                                        </button>
+                                        {user.role === 'admin' && (
+                                            <button onClick={() => setCurrentPage('admin')} className="hover:text-gray-200">
+                                                Admin Panel
+                                            </button>
+                                        )}
+                                        <span className="text-sm">Welcome, {user.name}</span>
+                                        <button
+                                            onClick={() => { logout(); setCurrentPage('home'); }}
+                                            className="bg-white text-indigo-600 px-4 py-2 rounded hover:bg-gray-100"
+                                        >
+                                            Logout
+                                        </button>
+                                    </>
+                                ) : (
+                                    <>
+                                        <button onClick={() => setCurrentPage('login')} className="hover:text-gray-200">
+                                            Login
+                                        </button>
+                                        <button
+                                            onClick={() => setCurrentPage('register')}
+                                            className="bg-white text-indigo-600 px-4 py-2 rounded hover:bg-gray-100"
+                                        >
+                                            Register
+                                        </button>
+                                    </>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                </nav>
+            );
+        };
+
+        // Login Component
+        const Login = ({ setCurrentPage }) => {
+            const [email, setEmail] = useState('');
+            const [password, setPassword] = useState('');
+            const [error, setError] = useState('');
+            const { login } = useAuth();
+
+            const handleSubmit = (e) => {
+                e.preventDefault();
+                const result = login(email, password);
+                if (result.success) {
+                    setCurrentPage('home');
+                } else {
+                    setError(result.error);
+                }
+            };
+
+            return (
+                <div className="min-h-screen bg-gray-50 flex items-center justify-center py-12 px-4">
+                    <div className="max-w-md w-full bg-white rounded-lg shadow-md p-8">
+                        <h2 className="text-3xl font-bold text-center mb-8">Login</h2>
+                        {error && <div className="bg-red-50 text-red-600 p-3 rounded mb-4">{error}</div>}
+                        <form onSubmit={handleSubmit} className="space-y-6">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                                <input
+                                    type="email"
+                                    value={email}
+                                    onChange={(e) => setEmail(e.target.value)}
+                                    required
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">Password</label>
+                                <input
+                                    type="password"
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
+                                    required
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                                />
+                            </div>
+                            <button
+                                type="submit"
+                                className="w-full bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700"
+                            >
+                                Login
+                            </button>
+                        </form>
+                        <p className="mt-4 text-center text-sm text-gray-600">
+                            Don't have an account?{' '}
+                            <button onClick={() => setCurrentPage('register')} className="text-indigo-600 hover:underline">
+                                Register here
+                            </button>
+                        </p>
+                        <div className="mt-6 p-4 bg-blue-50 rounded text-sm">
+                            <p className="font-semibold mb-2">Demo Accounts:</p>
+                            <p>Admin: admin@artcompetition.com / admin123</p>
+                            <p>User: user@example.com / user123</p>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        // Register Component
+        const Register = ({ setCurrentPage }) => {
+            const [name, setName] = useState('');
+            const [email, setEmail] = useState('');
+            const [password, setPassword] = useState('');
+            const [error, setError] = useState('');
+            const { register } = useAuth();
+
+            const handleSubmit = (e) => {
+                e.preventDefault();
+                if (password.length < 6) {
+                    setError('Password must be at least 6 characters');
+                    return;
+                }
+                const result = register(email, password, name);
+                if (result.success) {
+                    setCurrentPage('home');
+                } else {
+                    setError(result.error);
+                }
+            };
+
+            return (
+                <div className="min-h-screen bg-gray-50 flex items-center justify-center py-12 px-4">
+                    <div className="max-w-md w-full bg-white rounded-lg shadow-md p-8">
+                        <h2 className="text-3xl font-bold text-center mb-8">Register</h2>
+                        {error && <div className="bg-red-50 text-red-600 p-3 rounded mb-4">{error}</div>}
+                        <form onSubmit={handleSubmit} className="space-y-6">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">Full Name</label>
+                                <input
+                                    type="text"
+                                    value={name}
+                                    onChange={(e) => setName(e.target.value)}
+                                    required
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                                <input
+                                    type="email"
+                                    value={email}
+                                    onChange={(e) => setEmail(e.target.value)}
+                                    required
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">Password</label>
+                                <input
+                                    type="password"
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
+                                    required
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                                />
+                            </div>
+                            <button
+                                type="submit"
+                                className="w-full bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700"
+                            >
+                                Register
+                            </button>
+                        </form>
+                        <p className="mt-4 text-center text-sm text-gray-600">
+                            Already have an account?{' '}
+                            <button onClick={() => setCurrentPage('login')} className="text-indigo-600 hover:underline">
+                                Login here
+                            </button>
+                        </p>
+                    </div>
+                </div>
+            );
+        };
+
+        // Competition List Component
+        const CompetitionList = ({ setCurrentPage, setSelectedCompetition }) => {
+            const [competitions, setCompetitions] = useState([]);
+            const [categoryFilter, setCategoryFilter] = useState('');
+            const [statusFilter, setStatusFilter] = useState('open');
+
+            useEffect(() => {
+                const data = getData();
+                let filtered = data.competitions;
+                if (categoryFilter) {
+                    filtered = filtered.filter(c => c.category === categoryFilter);
+                }
+                if (statusFilter) {
+                    filtered = filtered.filter(c => c.status === statusFilter);
+                }
+                setCompetitions(filtered);
+            }, [categoryFilter, statusFilter]);
+
+            const formatDate = (dateString) => {
+                return new Date(dateString).toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                });
+            };
+
+            return (
+                <div className="min-h-screen bg-gray-50 py-8">
+                    <div className="container mx-auto px-4">
+                        <h1 className="text-4xl font-bold mb-8 text-center">Art Competitions</h1>
+                        <div className="mb-6 flex gap-4 justify-center">
+                            <select
+                                value={categoryFilter}
+                                onChange={(e) => setCategoryFilter(e.target.value)}
+                                className="px-4 py-2 border border-gray-300 rounded-md"
+                            >
+                                <option value="">All Categories</option>
+                                <option value="Painting">Painting</option>
+                                <option value="Sculpture">Sculpture</option>
+                                <option value="Photography">Photography</option>
+                                <option value="Digital Art">Digital Art</option>
+                                <option value="Mixed Media">Mixed Media</option>
+                            </select>
+                            <select
+                                value={statusFilter}
+                                onChange={(e) => setStatusFilter(e.target.value)}
+                                className="px-4 py-2 border border-gray-300 rounded-md"
+                            >
+                                <option value="">All Status</option>
+                                <option value="open">Open</option>
+                                <option value="closed">Closed</option>
+                                <option value="completed">Completed</option>
+                            </select>
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            {competitions.map(competition => (
+                                <div key={competition.id} className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition">
+                                    <img
+                                        src={competition.imageUrl}
+                                        alt={competition.title}
+                                        className="w-full h-48 object-cover"
+                                    />
+                                    <div className="p-6">
+                                        <div className="flex justify-between items-start mb-2">
+                                            <h3 className="text-xl font-bold">{competition.title}</h3>
+                                            <span className={`px-2 py-1 text-xs rounded ${competition.status === 'open' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+                                                {competition.status}
+                                            </span>
+                                        </div>
+                                        <p className="text-sm text-gray-600 mb-2">{competition.category}</p>
+                                        <p className="text-gray-700 mb-4 line-clamp-2">{competition.description}</p>
+                                        <div className="space-y-2 text-sm text-gray-600 mb-4">
+                                            <p>📅 {formatDate(competition.date)}</p>
+                                            <p>📍 {competition.location}</p>
+                                            <p>👥 {competition.currentParticipants} / {competition.maxParticipants}</p>
+                                            <p className="text-lg font-bold text-indigo-600">${competition.entryFee}</p>
+                                        </div>
+                                        <button
+                                            onClick={() => {
+                                                setSelectedCompetition(competition);
+                                                setCurrentPage('competition-detail');
+                                            }}
+                                            className="w-full bg-indigo-600 text-white py-2 rounded hover:bg-indigo-700"
+                                        >
+                                            View Details
+                                        </button>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        // Competition Detail Component
+        const CompetitionDetail = ({ competition, setCurrentPage }) => {
+            const { user } = useAuth();
+            const [artworkTitle, setArtworkTitle] = useState('');
+            const [artworkDescription, setArtworkDescription] = useState('');
+            const [message, setMessage] = useState({ type: '', text: '' });
+
+            const formatDate = (dateString) => {
+                return new Date(dateString).toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                });
+            };
+
+            const handleBooking = (e) => {
+                e.preventDefault();
+                if (!user) {
+                    setCurrentPage('login');
+                    return;
+                }
+
+                const data = getData();
+                const comp = data.competitions.find(c => c.id === competition.id);
+
+                if (comp.currentParticipants >= comp.maxParticipants) {
+                    setMessage({ type: 'error', text: 'Competition is fully booked' });
+                    return;
+                }
+
+                if (data.bookings.find(b => b.userId === user.id && b.competitionId === competition.id)) {
+                    setMessage({ type: 'error', text: 'You have already booked this competition' });
+                    return;
+                }
+
+                const newBooking = {
+                    id: data.nextBookingId++,
+                    userId: user.id,
+                    competitionId: competition.id,
+                    artworkTitle,
+                    artworkDescription,
+                    status: 'confirmed',
+                    bookingDate: new Date().toISOString()
+                };
+
+                data.bookings.push(newBooking);
+                comp.currentParticipants++;
+                saveData(data);
+
+                setMessage({ type: 'success', text: 'Booking successful! Check your bookings page.' });
+                setArtworkTitle('');
+                setArtworkDescription('');
+            };
+
+            const spotsRemaining = competition.maxParticipants - competition.currentParticipants;
+
+            return (
+                <div className="min-h-screen bg-gray-50 py-8">
+                    <div className="container mx-auto px-4">
+                        <button
+                            onClick={() => setCurrentPage('home')}
+                            className="mb-4 text-indigo-600 hover:underline"
+                        >
+                            ← Back to Competitions
+                        </button>
+                        <div className="max-w-4xl mx-auto bg-white rounded-lg shadow-md overflow-hidden">
+                            <img
+                                src={competition.imageUrl}
+                                alt={competition.title}
+                                className="w-full h-64 object-cover"
+                            />
+                            <div className="p-8">
+                                <h1 className="text-4xl font-bold mb-4">{competition.title}</h1>
+                                <p className="text-lg text-gray-600 mb-6">{competition.category}</p>
+                                <p className="text-gray-700 mb-6 text-lg">{competition.description}</p>
+                                <div className="grid grid-cols-2 gap-4 mb-8 bg-gray-50 p-6 rounded">
+                                    <div>
+                                        <p className="text-sm text-gray-600">Date</p>
+                                        <p className="font-semibold">{formatDate(competition.date)}</p>
+                                    </div>
+                                    <div>
+                                        <p className="text-sm text-gray-600">Location</p>
+                                        <p className="font-semibold">{competition.location}</p>
+                                    </div>
+                                    <div>
+                                        <p className="text-sm text-gray-600">Entry Fee</p>
+                                        <p className="font-semibold text-indigo-600 text-xl">${competition.entryFee}</p>
+                                    </div>
+                                    <div>
+                                        <p className="text-sm text-gray-600">Spots Available</p>
+                                        <p className="font-semibold">{spotsRemaining} / {competition.maxParticipants}</p>
+                                    </div>
+                                </div>
+
+                                {user && competition.status === 'open' && spotsRemaining > 0 && (
+                                    <div className="border-t pt-6">
+                                        <h2 className="text-2xl font-bold mb-4">Book Your Spot</h2>
+                                        {message.text && (
+                                            <div className={`p-3 rounded mb-4 ${message.type === 'error' ? 'bg-red-50 text-red-600' : 'bg-green-50 text-green-600'}`}>
+                                                {message.text}
+                                            </div>
+                                        )}
+                                        <form onSubmit={handleBooking} className="space-y-4">
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                                    Artwork Title (Optional)
+                                                </label>
+                                                <input
+                                                    type="text"
+                                                    value={artworkTitle}
+                                                    onChange={(e) => setArtworkTitle(e.target.value)}
+                                                    className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                                                />
+                                            </div>
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                                    Artwork Description (Optional)
+                                                </label>
+                                                <textarea
+                                                    value={artworkDescription}
+                                                    onChange={(e) => setArtworkDescription(e.target.value)}
+                                                    rows={4}
+                                                    className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                                                />
+                                            </div>
+                                            <button
+                                                type="submit"
+                                                className="w-full bg-indigo-600 text-white py-3 px-6 rounded-md hover:bg-indigo-700 text-lg font-semibold"
+                                            >
+                                                Book Now
+                                            </button>
+                                        </form>
+                                    </div>
+                                )}
+
+                                {!user && (
+                                    <div className="border-t pt-6">
+                                        <p className="text-center text-gray-600 mb-4">Please login to book this competition</p>
+                                        <button
+                                            onClick={() => setCurrentPage('login')}
+                                            className="w-full bg-indigo-600 text-white py-3 px-6 rounded-md hover:bg-indigo-700"
+                                        >
+                                            Login to Book
+                                        </button>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        // My Bookings Component
+        const MyBookings = ({ setCurrentPage }) => {
+            const { user } = useAuth();
+            const [bookings, setBookings] = useState([]);
+
+            useEffect(() => {
+                if (user) {
+                    const data = getData();
+                    const userBookings = data.bookings
+                        .filter(b => b.userId === user.id)
+                        .map(b => {
+                            const comp = data.competitions.find(c => c.id === b.competitionId);
+                            return { ...b, competition: comp };
+                        });
+                    setBookings(userBookings);
+                }
+            }, [user]);
+
+            const handleCancel = (bookingId) => {
+                if (!confirm('Are you sure you want to cancel this booking?')) return;
+
+                const data = getData();
+                const booking = data.bookings.find(b => b.id === bookingId);
+                booking.status = 'cancelled';
+                const comp = data.competitions.find(c => c.id === booking.competitionId);
+                comp.currentParticipants--;
+                saveData(data);
+                setBookings(bookings.map(b => b.id === bookingId ? { ...b, status: 'cancelled' } : b));
+            };
+
+            const formatDate = (dateString) => {
+                return new Date(dateString).toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                });
+            };
+
+            return (
+                <div className="min-h-screen bg-gray-50 py-8">
+                    <div className="container mx-auto px-4">
+                        <h1 className="text-4xl font-bold mb-8 text-center">My Bookings</h1>
+                        {bookings.length === 0 ? (
+                            <div className="text-center text-gray-600 py-12">
+                                You haven't made any bookings yet.
+                            </div>
+                        ) : (
+                            <div className="max-w-4xl mx-auto space-y-4">
+                                {bookings.map(booking => (
+                                    <div key={booking.id} className="bg-white rounded-lg shadow-md p-6">
+                                        <div className="flex justify-between items-start">
+                                            <div className="flex-1">
+                                                <h3 className="text-xl font-bold mb-2">{booking.competition.title}</h3>
+                                                <div className="space-y-1 text-gray-600 mb-4">
+                                                    <p>📅 {formatDate(booking.competition.date)}</p>
+                                                    <p>📍 {booking.competition.location}</p>
+                                                    <p>🕒 Booked on: {formatDate(booking.bookingDate)}</p>
+                                                </div>
+                                                {booking.artworkTitle && (
+                                                    <div className="bg-gray-50 p-4 rounded mb-4">
+                                                        <p className="font-semibold">Artwork: {booking.artworkTitle}</p>
+                                                        {booking.artworkDescription && (
+                                                            <p className="text-gray-700 mt-1">{booking.artworkDescription}</p>
+                                                        )}
+                                                    </div>
+                                                )}
+                                                <span className={`px-3 py-1 text-sm rounded ${booking.status === 'confirmed' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+                                                    {booking.status}
+                                                </span>
+                                            </div>
+                                            {booking.status === 'confirmed' && (
+                                                <button
+                                                    onClick={() => handleCancel(booking.id)}
+                                                    className="ml-4 px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
+                                                >
+                                                    Cancel
+                                                </button>
+                                            )}
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+                </div>
+            );
+        };
+
+        // Admin Panel Component
+        const AdminPanel = () => {
+            const { user } = useAuth();
+            const [activeTab, setActiveTab] = useState('competitions');
+            const [competitions, setCompetitions] = useState([]);
+            const [bookings, setBookings] = useState([]);
+            const [showForm, setShowForm] = useState(false);
+            const [formData, setFormData] = useState({
+                title: '',
+                description: '',
+                category: 'Painting',
+                date: '',
+                location: '',
+                maxParticipants: 50,
+                entryFee: 0,
+                imageUrl: ''
+            });
+
+            useEffect(() => {
+                loadData();
+            }, []);
+
+            const loadData = () => {
+                const data = getData();
+                setCompetitions(data.competitions);
+                const allBookings = data.bookings.map(b => {
+                    const comp = data.competitions.find(c => c.id === b.competitionId);
+                    const u = data.users.find(u => u.id === b.userId);
+                    return { ...b, competition: comp, user: u };
+                });
+                setBookings(allBookings);
+            };
+
+            const handleSubmit = (e) => {
+                e.preventDefault();
+                const data = getData();
+                const newComp = {
+                    id: data.nextCompetitionId++,
+                    ...formData,
+                    currentParticipants: 0,
+                    status: 'open'
+                };
+                data.competitions.push(newComp);
+                saveData(data);
+                setShowForm(false);
+                loadData();
+                setFormData({
+                    title: '',
+                    description: '',
+                    category: 'Painting',
+                    date: '',
+                    location: '',
+                    maxParticipants: 50,
+                    entryFee: 0,
+                    imageUrl: ''
+                });
+            };
+
+            const handleDelete = (id) => {
+                if (!confirm('Delete this competition?')) return;
+                const data = getData();
+                data.competitions = data.competitions.filter(c => c.id !== id);
+                saveData(data);
+                loadData();
+            };
+
+            const handleStatusChange = (id, status) => {
+                const data = getData();
+                const comp = data.competitions.find(c => c.id === id);
+                comp.status = status;
+                saveData(data);
+                loadData();
+            };
+
+            const formatDate = (dateString) => {
+                return new Date(dateString).toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                });
+            };
+
+            if (user?.role !== 'admin') {
+                return <div className="text-center py-12">Access denied. Admin only.</div>;
+            }
+
+            return (
+                <div className="min-h-screen bg-gray-50 py-8">
+                    <div className="container mx-auto px-4">
+                        <h1 className="text-4xl font-bold mb-8 text-center">Admin Panel</h1>
+                        <div className="mb-6 flex gap-4 justify-center">
+                            <button
+                                onClick={() => setActiveTab('competitions')}
+                                className={`px-6 py-2 rounded ${activeTab === 'competitions' ? 'bg-indigo-600 text-white' : 'bg-white'}`}
+                            >
+                                Competitions
+                            </button>
+                            <button
+                                onClick={() => setActiveTab('bookings')}
+                                className={`px-6 py-2 rounded ${activeTab === 'bookings' ? 'bg-indigo-600 text-white' : 'bg-white'}`}
+                            >
+                                All Bookings
+                            </button>
+                        </div>
+
+                        {activeTab === 'competitions' && (
+                            <div>
+                                <div className="mb-6 flex justify-end">
+                                    <button
+                                        onClick={() => setShowForm(!showForm)}
+                                        className="bg-indigo-600 text-white px-6 py-2 rounded hover:bg-indigo-700"
+                                    >
+                                        {showForm ? 'Cancel' : 'Add New Competition'}
+                                    </button>
+                                </div>
+
+                                {showForm && (
+                                    <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+                                        <h2 className="text-2xl font-bold mb-4">Create New Competition</h2>
+                                        <form onSubmit={handleSubmit} className="space-y-4">
+                                            <div className="grid grid-cols-2 gap-4">
+                                                <input
+                                                    type="text"
+                                                    placeholder="Title"
+                                                    required
+                                                    value={formData.title}
+                                                    onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                                                    className="px-3 py-2 border rounded"
+                                                />
+                                                <select
+                                                    value={formData.category}
+                                                    onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                                                    className="px-3 py-2 border rounded"
+                                                >
+                                                    <option>Painting</option>
+                                                    <option>Sculpture</option>
+                                                    <option>Photography</option>
+                                                    <option>Digital Art</option>
+                                                    <option>Mixed Media</option>
+                                                </select>
+                                                <input
+                                                    type="date"
+                                                    required
+                                                    value={formData.date}
+                                                    onChange={(e) => setFormData({ ...formData, date: e.target.value })}
+                                                    className="px-3 py-2 border rounded"
+                                                />
+                                                <input
+                                                    type="text"
+                                                    placeholder="Location"
+                                                    required
+                                                    value={formData.location}
+                                                    onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+                                                    className="px-3 py-2 border rounded"
+                                                />
+                                                <input
+                                                    type="number"
+                                                    placeholder="Max Participants"
+                                                    required
+                                                    value={formData.maxParticipants}
+                                                    onChange={(e) => setFormData({ ...formData, maxParticipants: Number(e.target.value) })}
+                                                    className="px-3 py-2 border rounded"
+                                                />
+                                                <input
+                                                    type="number"
+                                                    placeholder="Entry Fee"
+                                                    required
+                                                    value={formData.entryFee}
+                                                    onChange={(e) => setFormData({ ...formData, entryFee: Number(e.target.value) })}
+                                                    className="px-3 py-2 border rounded"
+                                                />
+                                            </div>
+                                            <textarea
+                                                placeholder="Description"
+                                                required
+                                                value={formData.description}
+                                                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                                                rows={3}
+                                                className="w-full px-3 py-2 border rounded"
+                                            />
+                                            <input
+                                                type="url"
+                                                placeholder="Image URL"
+                                                value={formData.imageUrl}
+                                                onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
+                                                className="w-full px-3 py-2 border rounded"
+                                            />
+                                            <button type="submit" className="w-full bg-indigo-600 text-white py-2 rounded hover:bg-indigo-700">
+                                                Create Competition
+                                            </button>
+                                        </form>
+                                    </div>
+                                )}
+
+                                <div className="space-y-4">
+                                    {competitions.map(comp => (
+                                        <div key={comp.id} className="bg-white rounded-lg shadow-md p-6">
+                                            <div className="flex justify-between items-start">
+                                                <div className="flex-1">
+                                                    <h3 className="text-xl font-bold">{comp.title}</h3>
+                                                    <p className="text-gray-600">{comp.category}</p>
+                                                    <p className="text-sm text-gray-500 mt-2">
+                                                        {formatDate(comp.date)} • {comp.location} • ${comp.entryFee}
+                                                    </p>
+                                                    <p className="text-sm text-gray-500">
+                                                        Participants: {comp.currentParticipants}/{comp.maxParticipants}
+                                                    </p>
+                                                </div>
+                                                <div className="space-y-2">
+                                                    <select
+                                                        value={comp.status}
+                                                        onChange={(e) => handleStatusChange(comp.id, e.target.value)}
+                                                        className="px-3 py-1 border rounded"
+                                                    >
+                                                        <option value="open">Open</option>
+                                                        <option value="closed">Closed</option>
+                                                        <option value="completed">Completed</option>
+                                                    </select>
+                                                    <button
+                                                        onClick={() => handleDelete(comp.id)}
+                                                        className="block w-full px-4 py-1 bg-red-500 text-white rounded hover:bg-red-600"
+                                                    >
+                                                        Delete
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {activeTab === 'bookings' && (
+                            <div className="space-y-4">
+                                {bookings.map(booking => (
+                                    <div key={booking.id} className="bg-white rounded-lg shadow-md p-6">
+                                        <div className="grid grid-cols-2 gap-4">
+                                            <div>
+                                                <p className="text-sm text-gray-600">Competition</p>
+                                                <p className="font-semibold">{booking.competition?.title}</p>
+                                            </div>
+                                            <div>
+                                                <p className="text-sm text-gray-600">User</p>
+                                                <p className="font-semibold">{booking.user?.name}</p>
+                                                <p className="text-sm">{booking.user?.email}</p>
+                                            </div>
+                                            <div>
+                                                <p className="text-sm text-gray-600">Booked</p>
+                                                <p>{formatDate(booking.bookingDate)}</p>
+                                            </div>
+                                            <div>
+                                                <p className="text-sm text-gray-600">Status</p>
+                                                <span className={`px-2 py-1 text-xs rounded ${booking.status === 'confirmed' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+                                                    {booking.status}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+                </div>
+            );
+        };
+
+        // Main App Component
+        const App = () => {
+            const [currentPage, setCurrentPage] = useState('home');
+            const [selectedCompetition, setSelectedCompetition] = useState(null);
+
+            useEffect(() => {
+                initializeData();
+            }, []);
+
+            return (
+                <AuthProvider>
+                    <div>
+                        <Navbar setCurrentPage={setCurrentPage} />
+                        {currentPage === 'home' && (
+                            <CompetitionList setCurrentPage={setCurrentPage} setSelectedCompetition={setSelectedCompetition} />
+                        )}
+                        {currentPage === 'login' && <Login setCurrentPage={setCurrentPage} />}
+                        {currentPage === 'register' && <Register setCurrentPage={setCurrentPage} />}
+                        {currentPage === 'competition-detail' && selectedCompetition && (
+                            <CompetitionDetail competition={selectedCompetition} setCurrentPage={setCurrentPage} />
+                        )}
+                        {currentPage === 'my-bookings' && <MyBookings setCurrentPage={setCurrentPage} />}
+                        {currentPage === 'admin' && <AdminPanel />}
+                    </div>
+                </AuthProvider>
+            );
+        };
+
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+</body>
+</html>
